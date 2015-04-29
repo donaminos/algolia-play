@@ -1,7 +1,12 @@
 Rails.application.routes.draw do
-  get 'search/indexData'
-
+  
   root 'search#searchData'
+
+  get 'search/indexData'
+  
+  post 'import' => 'search#import'
+  
+
 
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
