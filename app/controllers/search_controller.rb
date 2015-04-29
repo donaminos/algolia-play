@@ -9,61 +9,72 @@ Algolia.init :application_id => ENV['ALGOLIA_APPLICATION_ID'],
 	end
   
   def import
-  		data = [{
-  "objectID" => 44,
-  "title" => "Breaking Well",     
-  "episodes"=> [              
-    "Crazy Handful of Nothin'",
-    "Gray Matter"
-    ],
-  "like_count"=> 978,          
-  "avg_stuff"=> 1.23456,
-  "actors"=> [                 
-    {
-      "name"=> "Walter White",
-      "portrayed_by"=> "Bryan Cranston"
-    },
-    {
-      "name"=> "Skyler White",
-      "portrayed_by"=> "Anna Gunn"
-    }
-  ]
-},{
-  "objectID" => 43,
-  "title" => "Breaking Well",     
-  "episodes"=> [              
-    "Crazy Handful of Nothin'",
-    "Gray Matter"
-    ],
-  "like_count"=> 978,          
-  "avg_stuff"=> 1.23456,
-  "actors"=> [                 
-    {
-      "name"=> "Walter White",
-      "portrayed_by"=> "Bryan Cranston"
-    },
-    {
-      "name"=> "Skyler White",
-      "portrayed_by"=> "Anna Gunn"
-    }
-  ]
-}
-]
-  	  
-  	  	@index = Algolia::Index.new("algolia-play-test")
-			# `load_data_from_database` must return an array of Hash representing your objects
-		data.each_slice(1000) do |batch|
+
+  	if params[:upload].blank? || params[:upload][:xml].blank?
+    	
+    	@empty_files = true	
+		@indexingStatus = 'failure'
+	
+	else
+		upload_directory = "public/upload"
+    	original_xml = params[:upload][:xml].original_filename
+   
+		#paths for uploads
+    	xml_path = File.join(upload_directory, original_xml)
+    	
+    	#upload files to server
+    	File.open(xml_path, "wb") { |f| f.write( params[:upload][:xml].read ) }
+
+	    #read XML file
+		@xml = Nokogiri::XML(File.read(xml_path))
+
+		result = parse_xml(@xml.root)
+		
+		@records = result[:records]
+		@count = result[:count]
+
+
+  	  	@index = Algolia::Index.new("algolia-play-xml-parsing")
+
+		@records.each_slice(1000) do |batch|
 		  @index.add_objects(batch)
 		end
-		
+	
+		puts @records.to_s	
 		@indexingStatus = 'success'
-		
-		render 'indexData'
+	end
+
+	render 'indexData'
   end
 
   def searchData
   end
 
+  private
+
+	def parse_xml(xml, records=[], count=0)
+		
+		path = xml.path
+		attributes = xml.attributes
+		#name = el1.node_name
+
+		if not attributes.blank?
+			attributes.map do |k,v|
+				#increment total parsed elements
+				count += 1
+	
+				records << { :objectID => count,:attr => k, :val=> v.to_s}
+				
+				#log to console FYI
+				puts "path : //#{path}[@#{k}='#{v.to_s}']"
+				puts "objectID: #{count} ** attritube: #{k} ** value : #{v.to_s}\n"
+			end		
+		end 
+
+		xml.element_children.all? { |x| parse_xml(x, records, count) }
+		
+		result = {:records => records, :count => count }
+	end
 	
 
 
