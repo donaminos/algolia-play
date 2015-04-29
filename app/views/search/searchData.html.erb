@@ -2,10 +2,28 @@
 <div class="row">
 	<div class="col-md-8 col-md-offset-2">
 		<div class="jumbotron">
-			<h1>Search#indexData</h1>
-			<p>Find me in app/views/search/indexData.html.erb</p>
+			<h3>Search index using Agolia API:</h3>
+			<br>
+			
+			<div class="row">
+				<div class="col-md-10">
+					
+					<%= form_tag '/find' do %>
+
+					<div class="form-group">
+						<%= text_field_tag 'data', '', class: "form-control", :placeholder => 'What are you looking for?' %>
+					</div>
+
+					<%= submit_tag "Find now", class: "btn btn-default pull-right" %>
+
+					<% end %>
+
+				</div> 
+			</div>
+
+
+
 		</div>
 	</div>
-	
 </div>
 
