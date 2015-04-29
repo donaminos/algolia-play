@@ -34,9 +34,9 @@ Algolia.init :application_id => ENV['ALGOLIA_APPLICATION_ID'],
 		@count = result[:count]
 
 
-  	  	@index = Algolia::Index.new("algolia-play-xml-parsing")
+  	  	@index = Algolia::Index.new("algolia-play-fix")
 
-		@records.each_slice(1000) do |batch|
+		@records.each_slice(10000) do |batch|
 		  @index.add_objects(batch)
 		end
 	
@@ -63,7 +63,7 @@ Algolia.init :application_id => ENV['ALGOLIA_APPLICATION_ID'],
 				#increment total parsed elements
 				count += 1
 	
-				records << { :objectID => count,:attr => k, :val=> v.to_s}
+				records << { :id => count,:attr => k, :val=> v.to_s}
 				
 				#log to console FYI
 				puts "path : //#{path}[@#{k}='#{v.to_s}']"

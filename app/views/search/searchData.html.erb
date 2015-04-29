@@ -1,3 +1,51 @@
+<script src="//cdn.jsdelivr.net/algoliasearch/3/algoliasearch.min.js"></script>
+<script>
+  var client = algoliasearch("A5DJCA01B4", "c2ba455c913eff7f8bf2673976599ca5"); // public credentials
+  var index = client.initIndex('algolia-play-fix');
+
+function searchCallback(err, content) {
+  if (err) {
+    return err;
+  }
+
+	console.clear();
+	var table = document.getElementById("result");
+
+ 	var el= table.tBodies;
+ 	tBody = el[0];
+ 
+ 	tBody.innerHTML="";
+
+	//display results
+  content.hits.forEach(function(hit) {
+    
+    console.log(hit);
+	var row = tBody.insertRow();     
+
+	
+	var idCell = row.insertCell(0);
+	var attrCell = row.insertCell(1);
+	var valCell = row.insertCell(2);
+	
+	idCell.innerHTML = hit.objectID;
+	attrCell.innerHTML = hit.attr;
+	valCell.innerHTML = hit.val;
+
+
+  });
+};
+
+function searchInAlgolia(){
+	var param = document.getElementById("data").value;
+	var result = [];
+	if( param === undefined)
+		param = ""
+	result = index.search(param, searchCallback);
+
+}
+
+
+</script>
 
 <div class="row">
 	<div class="col-md-8 col-md-offset-2">
@@ -11,7 +59,7 @@
 					<%= form_tag '/find' do %>
 
 					<div class="form-group">
-						<%= text_field_tag 'data', '', class: "form-control", :placeholder => 'What are you looking for?' %>
+						<%= text_field_tag 'data', '', class: "form-control", :placeholder => 'What are you looking for?', :onkeyup => 'searchInAlgolia()' %>
 					</div>
 
 					<%= submit_tag "Find now", class: "btn btn-default pull-right" %>
@@ -26,4 +74,22 @@
 		</div>
 	</div>
 </div>
+
+<div class="row">
+	<div class="col-md-8 col-md-offset-2">
+		<table class="table table-triped table-bordered" id='result'>
+			 <thead>
+			  <tr>
+			     <th>ID</th>
+			     <th>Attribute</th>
+			     <th>Value</th>
+			  </tr>
+			 </thead>
+			 <tbody>
+			 	
+			 </tbody>
+		</table>
+	</div>
+</div>
+
 
